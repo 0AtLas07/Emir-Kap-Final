@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMİR KAPI TOSYA - Ürün Kataloğu</title>
+  <meta name="description" content="EMİR KAPI TOSYA - Tosya'nın lider kapı üreticisi. Modern tasarımlı çelik kapı, ahşap kapı, iç/dış kapı modelleri. Ücretsiz teslimat ve montaj.">
+  <meta name="keywords" content="tosya kapı, kastamonu kapı, çelik kapı, ahşap kapı, iç kapı, dış kapı, emir kapı tosya">
+  <meta name="author" content="EMİR KAPI TOSYA">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="Css/MainPageStyles.css">
+  <link rel="icon" href="img/WhatsApp Görsel 2025-05-29 saat 14.38.41_ba7e8661.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="Css/Popup.css">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="EMİR KAPI TOSYA - Ürün Kataloğu">
+  <meta property="og:description" content="Tosya'nın lider kapı üreticisi - Modern tasarımlar, üstün kalite ve uygun fiyatlı kapı çözümleri">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.emirkapitosya.com/catalog.html">
+  <meta property="og:image" content="https://www.emirkapitosya.com/images/logo-social.jpg">
+
+</head>
+<body>
+    <!-- Header -->
+  <header>
+    <div class="container header-container">
+      <div class="logo">
+        <a href="admin.html"><i class="fas fa-door-open fa-2x"></i></a>
+        <h1>EMİR KAPI TOSYA</h1>   
+      </div>
+      <h2>TEL:05414086087</h2> 
+      <h2>TEL:05379626460</h2>
+      
+      <nav>
+        <ul>
+          <li><a href="index.html"><i class="fas fa-home"></i> Ana Sayfa</a></li>
+          <li><a href="contact.html"><i class="fas fa-phone"></i> İletişim</a></li>
+        </ul>
+      </nav>
+  </header>
+  
+
+    <div class="modal-overlay" id="productModal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <div class="modal-body">
+        <div class="modal-image">
+          <img id="modalImage" src="" alt="Product Image">
+        </div>
+        <div class="modal-info">
+          <h3 id="modalTitle"></h3>
+          <div class="modal-price">
+            <span id="modalOldPrice" class="old-price"></span>
+            <span id="modalPrice"></span>
+          </div>
+          <ul class="modal-features" id="modalFeatures"></ul>
+          <a href="contact.html" class="contact-btn">
+            <i class="fas fa-phone"></i> Hemen Teklif Al
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Products Section -->
+<section class="container">
+  <h2 class="section-title">Öne Çıkan Ürünler</h2>
+  <!-- Directly use products-container with catalog class -->
+  <div id="products-container" class="catalog">
+    <!-- JS will inject product cards here -->
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  // Supabase initialization
+  const SUPABASE_URL = 'https://rfqfmouwbvnqjtsdveym.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWZtb3V3YnZucWp0c2R2ZXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwNzkwMzAsImV4cCI6MjA2NzY1NTAzMH0.1Xxnym1R2IXqb7M1fLUcsbInPREBcMmNhiqKeu9VaWg';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Modal elements and functions - defined FIRST
+  const modal = document.getElementById('productModal');
+  const closeBtn = document.querySelector('.close-modal');
+
+  function openProductModal(product) {
+    document.getElementById('modalImage').src = product.imageUrl;
+    document.getElementById('modalTitle').textContent = product.name;
+    document.getElementById('modalPrice').textContent = product.price + ' TL';
+    
+    const oldPriceEl = document.getElementById('modalOldPrice');
+    if (product.oldPrice) {
+      oldPriceEl.textContent = product.oldPrice + ' TL';
+      oldPriceEl.style.display = 'inline';
+    } else {
+      oldPriceEl.style.display = 'none';
+    }
+    
+    const featuresList = document.getElementById('modalFeatures');
+    featuresList.innerHTML = '';
+    product.features.forEach(feature => {
+      const li = document.createElement('li');
+      li.textContent = feature;
+      featuresList.appendChild(li);
+    });
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Close modal handlers
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  });
+
+  // Fetch products from Supabase
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('*');
+  
+  if (error) {
+    console.error('Error loading products:', error);
+    return;
+  }
+
+  // Render products
+  const container = document.getElementById('products-container');
+  container.innerHTML = '';
+  
+  products.forEach((data, idx) => {
+    const card = document.createElement('div');
+    card.className = 'product';
+    card.dataset.id = idx;  // CRITICAL: Store product index
+    card.innerHTML = `
+      <img src="${data.imageUrl}" alt="${data.name}">
+      <div class="product-info">
+        <h3>${data.name}</h3>
+        <ul class="product-features">
+          ${data.features.slice(0, 3).map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        <div class="product-price">
+          ${data.oldPrice ? 
+            `<span class="old-price">${data.oldPrice} TL</span><span>${data.price} TL</span>` : 
+            `<span>${data.price} TL</span>`
+          }
+        </div>
+        <button class="view-details">Detayları Gör</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Add click events to DETAILS buttons
+  document.querySelectorAll('.view-details').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const productCard = e.target.closest('.product');
+      const productId = productCard.dataset.id;
+      openProductModal(products[productId]);
+    });
+  });
+});
+</script>
+</body>
+</html>
